@@ -1,68 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Google Proxy</title>
-  <style>
-    body {
-      font-family: Arial;
-      margin: 40px;
-      text-align: center;
-      background: #f1f3f4;
-    }
-
-    input {
-      width: 80%;
-      padding: 15px;
-      font-size: 16px;
-      margin: 10px;
-    }
-
-    button {
-      padding: 15px 25px;
-      font-size: 18px;
-      background: #4285f4;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-
-    #content {
-      margin-top: 20px;
-      text-align: left;
-      background: white;
-      padding: 15px;
-      min-height: 400px;
-      border: 1px solid #ddd;
-      overflow: auto;
-    }
-  </style>
+  <title>Google Clone</title>
 </head>
-<body>
+<body style="text-align:center; margin-top:100px; font-family:Arial;">
 
-  <h1>🌐 Simple Proxy</h1>
+  <h1>🔍 Google Clone</h1>
 
-  <input id="url" placeholder="Enter URL (https://...)" value="https://www.google.com">
-  <br>
-  <button onclick="load()">Load</button>
-
-  <div id="content"></div>
+  <form onsubmit="searchGoogle(event)">
+    <input id="q" type="text" placeholder="Search..." style="width:300px;padding:10px;">
+    <button type="submit">Search</button>
+  </form>
 
   <script>
-    async function load() {
-      const url = document.getElementById("url").value;
-      const box = document.getElementById("content");
+    function searchGoogle(e) {
+      e.preventDefault();
 
-      box.innerHTML = "Loading...";
+      const query = document.getElementById("q").value;
 
-      try {
-        const res = await fetch("/proxy?url=" + encodeURIComponent(url));
-        const text = await res.text();
-        box.innerHTML = text;
-      } catch (e) {
-        box.innerHTML = "Error: " + e.message;
-      }
+      // OPTION B + C COMBINED:
+      // send to YOUR SERVER search route (prevents Cannot GET)
+      window.location.href = "/search?q=" + encodeURIComponent(query);
     }
   </script>
 
