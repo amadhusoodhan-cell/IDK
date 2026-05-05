@@ -1,13 +1,14 @@
 {
-  "name": "my-proxy",
-  "version": "1.0.0",
+  "name": "small_guys_proxie",
+  "version": "3.0.0",
+  "description": "Level 3 proxy UI system",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
     "axios": "^1.7.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
 }
