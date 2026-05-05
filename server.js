@@ -7,12 +7,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
+app.use(express.json());
+
+/* ✅ MUST be BEFORE routes */
 app.use(express.static(path.join(__dirname, "public")));
 
-/* 🧠 MAIN PROXY FETCH LAYER */
-app.get("/fetch", async (req, res) => {
-  const url = req.query.url;
+/* Home */
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>🚀 Mini Browser Running</h1>
+    <a href="/google.html">Open App</a>
+  `);
+});
 
+/* Basic proxy (NOT full UV, but works for simple pages) */
+app.get("/proxy", async (req, res) => {
+  const url = req.query.url;
   if (!url) return res.status(400).send("Missing URL");
 
   try {
@@ -20,20 +30,21 @@ app.get("/fetch", async (req, res) => {
       headers: {
         "User-Agent": "Mozilla/5.0"
       },
-      responseType: "text"
+      responseType: "arraybuffer"
     });
 
+    res.set("Content-Type", response.headers["content-type"]);
     res.send(response.data);
   } catch (err) {
-    res.status(500).send("Fetch error: " + err.message);
+    res.status(500).send("Proxy error: " + err.message);
   }
 });
 
-/* SPA fallback (prevents Cannot GET errors) */
+/* SPA fallback (prevents Cannot GET) */
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "google.html"));
 });
 
 app.listen(PORT, () => {
-  console.log("Server running on " + PORT);
+  console.log("Server running on port " + PORT);
 });
