@@ -1,7 +1,7 @@
 const express = require("express");
+const path = require("path");
 const axios = require("axios");
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,32 +9,38 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// serve static files (google.html)
+// serve frontend
 app.use(express.static(path.join(__dirname, "public")));
 
-// home page
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>✅ Proxy Server Running</h1>
-    <p><a href="/google.html">Open Google Page</a></p>
-  `);
+/* -----------------------------
+   🔎 SEARCH API (live suggestions)
+------------------------------*/
+const fakeSuggestions = [
+  "hello world",
+  "how to code",
+  "github",
+  "google",
+  "proxy server",
+  "node js",
+  "render deploy",
+  "javascript tutorial"
+];
+
+app.get("/suggest", (req, res) => {
+  const q = (req.query.q || "").toLowerCase();
+
+  if (!q) return res.json([]);
+
+  const results = fakeSuggestions.filter(item =>
+    item.toLowerCase().includes(q)
+  );
+
+  res.json(results.slice(0, 5));
 });
 
-// OPTION C FIX: handle search route so it never crashes
-app.get("/search", (req, res) => {
-  const q = req.query.q;
-
-  if (!q) {
-    return res.send("No search query provided");
-  }
-
-  res.send(`
-    <h2>🔎 You searched for: ${q}</h2>
-    <a href="/google.html">⬅ Back</a>
-  `);
-});
-
-// proxy endpoint (your original feature)
+/* -----------------------------
+   🌐 PROXY (iframe fetch backend)
+------------------------------*/
 app.get("/proxy", async (req, res) => {
   const url = req.query.url;
 
@@ -49,13 +55,15 @@ app.get("/proxy", async (req, res) => {
     res.set("Content-Type", response.headers["content-type"]);
     res.send(response.data);
   } catch (err) {
-    res.status(500).send("Proxy error: " + err.message);
+    res.status(500).send("Proxy error");
   }
 });
 
-// safety fallback (prevents ugly Cannot GET errors)
-app.use((req, res) => {
-  res.status(404).send("❌ Route not found");
+/* -----------------------------
+   🚫 ANTI 404 SYSTEM (IMPORTANT)
+------------------------------*/
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.listen(PORT, () => {
