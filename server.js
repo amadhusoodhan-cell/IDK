@@ -1,7 +1,7 @@
 const express = require("express");
-const path = require("path");
 const axios = require("axios");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,38 +9,18 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// serve frontend
+/* 🔥 CRITICAL FIX: serve static files */
 app.use(express.static(path.join(__dirname, "public")));
 
-/* -----------------------------
-   🔎 SEARCH API (live suggestions)
-------------------------------*/
-const fakeSuggestions = [
-  "hello world",
-  "how to code",
-  "github",
-  "google",
-  "proxy server",
-  "node js",
-  "render deploy",
-  "javascript tutorial"
-];
-
-app.get("/suggest", (req, res) => {
-  const q = (req.query.q || "").toLowerCase();
-
-  if (!q) return res.json([]);
-
-  const results = fakeSuggestions.filter(item =>
-    item.toLowerCase().includes(q)
-  );
-
-  res.json(results.slice(0, 5));
+/* Home route */
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>✅ Proxy Server Running</h1>
+    <p><a href="/google.html">Open Google Proxy Page</a></p>
+  `);
 });
 
-/* -----------------------------
-   🌐 PROXY (iframe fetch backend)
-------------------------------*/
+/* Proxy endpoint */
 app.get("/proxy", async (req, res) => {
   const url = req.query.url;
 
@@ -49,21 +29,22 @@ app.get("/proxy", async (req, res) => {
   try {
     const response = await axios.get(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
-      responseType: "arraybuffer"
+      responseType: "arraybuffer",
     });
 
     res.set("Content-Type", response.headers["content-type"]);
     res.send(response.data);
   } catch (err) {
-    res.status(500).send("Proxy error");
+    res.status(500).send("Proxy error: " + err.message);
   }
 });
 
-/* -----------------------------
-   🚫 ANTI 404 SYSTEM (IMPORTANT)
-------------------------------*/
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+/* 🔥 Catch-all fallback (prevents “Cannot GET”) */
+app.use((req, res) => {
+  res.status(404).send(`
+    <h2>404 Not Found</h2>
+    <a href="/">Go Home</a>
+  `);
 });
 
 app.listen(PORT, () => {
