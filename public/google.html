@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Google Proxy</title>
+  <title>Mini UV Browser</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial;
-      text-align: center;
       background: #111;
       color: white;
     }
 
-    input {
-      width: 60%;
+    #bar {
+      display: flex;
       padding: 10px;
-      margin-top: 20px;
+      background: #222;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border: none;
     }
 
     button {
-      padding: 10px 15px;
+      padding: 10px;
       cursor: pointer;
     }
 
     iframe {
-      width: 90%;
-      height: 80vh;
-      margin-top: 20px;
+      width: 100%;
+      height: 90vh;
       border: none;
       background: white;
     }
@@ -33,15 +38,15 @@
 
 <body>
 
-<h1>🌐 Proxy Browser</h1>
-
-<input id="url" placeholder="Enter URL (https://example.com)">
-<button onclick="loadSite()">Go</button>
+<div id="bar">
+  <input id="url" placeholder="Enter URL">
+  <button onclick="go()">Go</button>
+</div>
 
 <iframe id="frame"></iframe>
 
 <script>
-function loadSite() {
+function go() {
   let url = document.getElementById("url").value;
 
   if (!url.startsWith("http")) {
@@ -49,7 +54,7 @@ function loadSite() {
   }
 
   document.getElementById("frame").src =
-    "/proxy?url=" + encodeURIComponent(url);
+    "/fetch?url=" + encodeURIComponent(url);
 }
 </script>
 
