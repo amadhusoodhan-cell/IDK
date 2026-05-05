@@ -1,62 +1,227 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mini Browser</title>
+  <title>small_guys_proxie</title>
+
   <style>
     body {
       margin: 0;
       font-family: Arial;
-      background: #111;
+      background: radial-gradient(circle at top, #0f0f0f, #000);
       color: white;
+      overflow: hidden;
     }
 
-    #bar {
+    /* LOGIN */
+    #login {
+      height: 100vh;
       display: flex;
-      padding: 10px;
-      background: #222;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
     }
 
     input {
-      flex: 1;
       padding: 10px;
+      border-radius: 8px;
       border: none;
+      width: 250px;
       outline: none;
     }
 
     button {
-      padding: 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
+      background: #00c2ff;
+      font-weight: bold;
     }
 
-    iframe {
+    /* APP */
+    .hidden { display: none; }
+
+    #bar {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(30,30,30,0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    #frame {
       width: 100%;
       height: 90vh;
       border: none;
       background: white;
+    }
+
+    #suggestions {
+      position: absolute;
+      top: 55px;
+      left: 10px;
+      right: 10px;
+      background: #222;
+      border-radius: 8px;
+      display: none;
+    }
+
+    #suggestions div {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    #suggestions div:hover {
+      background: #333;
+    }
+
+    /* DEV PANEL */
+    #dev {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111;
+      border: 1px solid #00c2ff;
+      box-shadow: 0 0 20px #00c2ff;
+      padding: 20px;
+      display: none;
+      width: 300px;
     }
   </style>
 </head>
 
 <body>
 
-<div id="bar">
-  <input id="url" placeholder="Search or enter URL">
-  <button onclick="go()">Go</button>
+<!-- LOGIN SCREEN -->
+<div id="login">
+  <h1>🔐 small_guys_proxie</h1>
+  <input id="pass" type="password" placeholder="Enter password">
+  <button onclick="login()">Unlock</button>
 </div>
 
-<iframe id="frame"></iframe>
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+
+  <div id="bar">
+    <input id="url" placeholder="Search or URL..." oninput="suggest()">
+    <button onclick="go()">Go</button>
+    <button onclick="devOpen()">🛠 Dev</button>
+  </div>
+
+  <div id="suggestions"></div>
+
+  <iframe id="frame"></iframe>
+</div>
+
+<!-- DEV PANEL -->
+<div id="dev">
+  <h3>🛠 Dev Tools</h3>
+
+  <input id="newSite" placeholder="New site password"><br><br>
+  <input id="newDev" placeholder="New dev password"><br><br>
+
+  <button onclick="setSite()">Change Site Pass</button>
+  <button onclick="setDev()">Change Dev Pass</button>
+  <button onclick="closeDev()">Close</button>
+</div>
 
 <script>
+/* DEFAULT PASSWORDS */
+let sitePass = localStorage.getItem("sitePass") || "May_the_purv_be_with_you";
+let devPass = localStorage.getItem("devPass") || "Hi@12345";
+
+/* LOGIN */
+function login() {
+  const v = document.getElementById("pass").value;
+
+  if (v === sitePass) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").classList.remove("hidden");
+  } else {
+    alert("❌ Wrong password");
+  }
+}
+
+/* PROXY */
 function go() {
   let url = document.getElementById("url").value;
 
   if (!url.startsWith("http")) {
-    url = "https://www.google.com/search?q=" + encodeURIComponent(url);
+    url = "https://" + url;
   }
 
   document.getElementById("frame").src =
     "/proxy?url=" + encodeURIComponent(url);
 }
+
+/* SUGGESTIONS */
+function suggest() {
+  const v = document.getElementById("url").value;
+  if (!v) return;
+
+  const box = document.getElementById("suggestions");
+
+  const items = [
+    v + " games",
+    v + " poki",
+    v + " crazy games",
+    "google " + v
+  ];
+
+  box.innerHTML = items.map(i =>
+    `<div onclick="pick('${i}')">${i}</div>`
+  ).join("");
+
+  box.style.display = "block";
+}
+
+function pick(v) {
+  document.getElementById("url").value = v;
+  document.getElementById("suggestions").style.display = "none";
+}
+
+/* DEV */
+function devOpen() {
+  const p = prompt("Dev password:");
+
+  if (p === devPass) {
+    document.getElementById("dev").style.display = "block";
+  } else {
+    alert("❌ No access");
+  }
+}
+
+function closeDev() {
+  document.getElementById("dev").style.display = "none";
+}
+
+/* CHANGE PASSWORDS */
+function setSite() {
+  const v = document.getElementById("newSite").value;
+  if (!v) return;
+
+  sitePass = v;
+  localStorage.setItem("sitePass", v);
+  alert("✅ Site password updated");
+}
+
+function setDev() {
+  const v = document.getElementById("newDev").value;
+  if (!v) return;
+
+  devPass = v;
+  localStorage.setItem("devPass", v);
+  alert("✅ Dev password updated");
+}
+
+/* click off suggestions */
+document.addEventListener("click", (e) => {
+  if (!document.getElementById("bar")?.contains(e.target)) {
+    document.getElementById("suggestions").style.display = "none";
+  }
+});
 </script>
 
 </body>
