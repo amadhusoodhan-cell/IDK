@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mini UV Browser</title>
+  <title>Mini Browser</title>
   <style>
     body {
       margin: 0;
@@ -20,6 +20,7 @@
       flex: 1;
       padding: 10px;
       border: none;
+      outline: none;
     }
 
     button {
@@ -39,7 +40,7 @@
 <body>
 
 <div id="bar">
-  <input id="url" placeholder="Enter URL">
+  <input id="url" placeholder="Search or enter URL">
   <button onclick="go()">Go</button>
 </div>
 
@@ -50,11 +51,11 @@ function go() {
   let url = document.getElementById("url").value;
 
   if (!url.startsWith("http")) {
-    url = "https://" + url;
+    url = "https://www.google.com/search?q=" + encodeURIComponent(url);
   }
 
   document.getElementById("frame").src =
-    "/fetch?url=" + encodeURIComponent(url);
+    "/proxy?url=" + encodeURIComponent(url);
 }
 </script>
 
