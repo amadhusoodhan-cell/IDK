@@ -1,28 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Google Clone</title>
-</head>
-<body style="text-align:center; margin-top:100px; font-family:Arial;">
+  <title>Mini Web OS</title>
 
-  <h1>🔍 Google Clone</h1>
-
-  <form onsubmit="searchGoogle(event)">
-    <input id="q" type="text" placeholder="Search..." style="width:300px;padding:10px;">
-    <button type="submit">Search</button>
-  </form>
-
-  <script>
-    function searchGoogle(e) {
-      e.preventDefault();
-
-      const query = document.getElementById("q").value;
-
-      // OPTION B + C COMBINED:
-      // send to YOUR SERVER search route (prevents Cannot GET)
-      window.location.href = "/search?q=" + encodeURIComponent(query);
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #111;
+      color: white;
     }
-  </script>
+
+    .topbar {
+      display: flex;
+      padding: 10px;
+      background: #222;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px;
+      margin-left: 5px;
+    }
+
+    #suggestions {
+      background: #333;
+      position: absolute;
+      width: 300px;
+    }
+
+    .sugg {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .sugg:hover {
+      background: #555;
+    }
+
+    iframe {
+      width: 100%;
+      height: 90vh;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <input id="url" placeholder="Search or type URL..." oninput="getSuggestions()" />
+  <button onclick="loadSite()">Go</button>
+</div>
+
+<div id="suggestions"></div>
+
+<iframe id="frame"></iframe>
+
+<script>
+let currentQuery = "";
+
+/* -------------------------
+   🔎 LIVE SUGGESTIONS
+--------------------------*/
+async function getSuggestions() {
+  const q = document.getElementById("url").value;
+
+  currentQuery = q;
+
+  if (!q) {
+    document.getElementById("suggestions").innerHTML = "";
+    return;
+  }
+
+  const res = await fetch("/suggest?q=" + q);
+  const data = await res.json();
+
+  document.getElementById("suggestions").innerHTML =
+    data.map(item =>
+      `<div class="sugg" onclick="use('${item}')">${item}</div>`
+    ).join("");
+}
+
+function use(text) {
+  document.getElementById("url").value = text;
+  document.getElementById("suggestions").innerHTML = "";
+}
+
+/* -------------------------
+   🌐 LOAD WEBSITE IN IFRAME
+--------------------------*/
+function loadSite() {
+  let url = document.getElementById("url").value;
+
+  if (!url.startsWith("http")) {
+    url = "https://www.google.com/search?q=" + encodeURIComponent(url);
+  }
+
+  document.getElementById("frame").src =
+    "/proxy?url=" + encodeURIComponent(url);
+
+  document.getElementById("suggestions").innerHTML = "";
+}
+</script>
 
 </body>
 </html>
