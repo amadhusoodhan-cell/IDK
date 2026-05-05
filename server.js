@@ -7,43 +7,33 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
-
-/* ✅ THIS IS THE KEY FIX */
 app.use(express.static(path.join(__dirname, "public")));
 
-/* Home route */
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>✅ Proxy Server Running</h1>
-    <p><a href="/google.html">Open Google Page</a></p>
-  `);
-});
-
-/* Proxy endpoint */
-app.get("/proxy", async (req, res) => {
+/* 🧠 MAIN PROXY FETCH LAYER */
+app.get("/fetch", async (req, res) => {
   const url = req.query.url;
 
   if (!url) return res.status(400).send("Missing URL");
 
   try {
     const response = await axios.get(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
-      responseType: "arraybuffer"
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      },
+      responseType: "text"
     });
 
-    res.set("Content-Type", response.headers["content-type"]);
     res.send(response.data);
   } catch (err) {
-    res.status(500).send("Proxy error: " + err.message);
+    res.status(500).send("Fetch error: " + err.message);
   }
 });
 
-/* Catch-all fix (prevents "Cannot GET") */
+/* SPA fallback (prevents Cannot GET errors) */
 app.get("*", (req, res) => {
-  res.status(404).send("Page not found");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("Server running on " + PORT);
 });
