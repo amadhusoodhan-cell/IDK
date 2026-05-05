@@ -6,23 +6,22 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+/* middleware */
 app.use(cors());
 app.use(express.json());
 
-/* ✅ MUST be BEFORE routes */
+/* serve frontend */
 app.use(express.static(path.join(__dirname, "public")));
 
-/* Home */
+/* home redirect */
 app.get("/", (req, res) => {
-  res.send(`
-    <h1>🚀 Mini Browser Running</h1>
-    <a href="/google.html">Open App</a>
-  `);
+  res.redirect("/Google.html");
 });
 
-/* Basic proxy (NOT full UV, but works for simple pages) */
+/* proxy engine */
 app.get("/proxy", async (req, res) => {
   const url = req.query.url;
+
   if (!url) return res.status(400).send("Missing URL");
 
   try {
@@ -33,18 +32,21 @@ app.get("/proxy", async (req, res) => {
       responseType: "arraybuffer"
     });
 
-    res.set("Content-Type", response.headers["content-type"]);
+    const contentType = response.headers["content-type"];
+
+    res.set("Content-Type", contentType);
     res.send(response.data);
+
   } catch (err) {
     res.status(500).send("Proxy error: " + err.message);
   }
 });
 
-/* SPA fallback (prevents Cannot GET) */
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "google.html"));
+/* catch-all (prevents random crashes) */
+app.use((req, res) => {
+  res.status(404).send("Not Found");
 });
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("🚀 Server running on port " + PORT);
 });
