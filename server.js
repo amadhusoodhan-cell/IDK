@@ -9,10 +9,14 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-/* 🔥 CRITICAL FIX: serve static files */
+/* =========================
+   🔥 SERVE FRONTEND FILES
+========================= */
 app.use(express.static(path.join(__dirname, "public")));
 
-/* Home route */
+/* =========================
+   🏠 HOME ROUTE
+========================= */
 app.get("/", (req, res) => {
   res.send(`
     <h1>✅ Proxy Server Running</h1>
@@ -20,7 +24,9 @@ app.get("/", (req, res) => {
   `);
 });
 
-/* Proxy endpoint */
+/* =========================
+   🌐 PROXY ENDPOINT
+========================= */
 app.get("/proxy", async (req, res) => {
   const url = req.query.url;
 
@@ -39,14 +45,9 @@ app.get("/proxy", async (req, res) => {
   }
 });
 
-/* 🔥 Catch-all fallback (prevents “Cannot GET”) */
-app.use((req, res) => {
-  res.status(404).send(`
-    <h2>404 Not Found</h2>
-    <a href="/">Go Home</a>
-  `);
-});
-
+/* =========================
+   🚀 START SERVER
+========================= */
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
