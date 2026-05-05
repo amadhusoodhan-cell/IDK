@@ -9,24 +9,18 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-/* =========================
-   🔥 SERVE FRONTEND FILES
-========================= */
+/* ✅ THIS IS THE KEY FIX */
 app.use(express.static(path.join(__dirname, "public")));
 
-/* =========================
-   🏠 HOME ROUTE
-========================= */
+/* Home route */
 app.get("/", (req, res) => {
   res.send(`
     <h1>✅ Proxy Server Running</h1>
-    <p><a href="/google.html">Open Google Proxy Page</a></p>
+    <p><a href="/google.html">Open Google Page</a></p>
   `);
 });
 
-/* =========================
-   🌐 PROXY ENDPOINT
-========================= */
+/* Proxy endpoint */
 app.get("/proxy", async (req, res) => {
   const url = req.query.url;
 
@@ -35,7 +29,7 @@ app.get("/proxy", async (req, res) => {
   try {
     const response = await axios.get(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
-      responseType: "arraybuffer",
+      responseType: "arraybuffer"
     });
 
     res.set("Content-Type", response.headers["content-type"]);
@@ -45,9 +39,11 @@ app.get("/proxy", async (req, res) => {
   }
 });
 
-/* =========================
-   🚀 START SERVER
-========================= */
+/* Catch-all fix (prevents "Cannot GET") */
+app.get("*", (req, res) => {
+  res.status(404).send("Page not found");
+});
+
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
